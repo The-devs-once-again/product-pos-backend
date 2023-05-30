@@ -1,0 +1,8 @@
+django
+djangorestframework
+requests
+dj-database-url
+django-cors-headers
+djangorestframework-simplejwt
+psycopg2-binary
+watchdog
