@@ -40,3 +40,21 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = ('product_name', 'product_price', 'category', 'variation')
+
+    def create(self, validated_data):
+        variation_data = validated_data.pop('variation')
+        size_data = variation_data.pop('size')
+        add_on_data = variation_data.pop('add_on')
+
+        size_price = Price.objects.create(price=size_data.pop('size_price')['price'])
+        size = Size.objects.create(size_price=size_price, **size_data)
+
+        add_on_price = Price.objects.create(price=add_on_data.pop('add_on_price')['price'])
+        add_on = AddOn.objects.create(add_on_price=add_on_price, **add_on_data)
+
+        variation = Variation.objects.create(size=size, add_on=add_on)
+
+        product_price = Price.objects.create(price=validated_data.pop('product_price')['price'])
+        product = Product.objects.create(product_price=product_price, variation=variation, **validated_data)
+
+        return product
