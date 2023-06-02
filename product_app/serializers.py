@@ -35,24 +35,34 @@ class VariationSerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     product_price = PriceSerializer()
-    variation = VariationSerializer()
+    variation = VariationSerializer(required=False)
 
     class Meta:
         model = Product
-        fields = ('product_name', 'product_price', 'category', 'variation')
+        fields = ('product_name', 'product_price', 'product_type', 'category', 'variation')
 
     def create(self, validated_data):
-        variation_data = validated_data.pop('variation')
-        size_data = variation_data.pop('size')
-        add_on_data = variation_data.pop('add_on')
+        variation_data = validated_data.pop('variation', None)
 
-        size_price = Price.objects.create(price=size_data.pop('size_price')['price'])
-        size = Size.objects.create(size_price=size_price, **size_data)
+        if variation_data:
+            size_data_list = variation_data.pop('size')
+            add_on_data_list = variation_data.pop('add_on')
 
-        add_on_price = Price.objects.create(price=add_on_data.pop('add_on_price')['price'])
-        add_on = AddOn.objects.create(add_on_price=add_on_price, **add_on_data)
+            size_list = []
+            for size_data in size_data_list:
+                size_price = Price.objects.create(price=size_data.pop('size_price')['price'])
+                size_list.append(Size.objects.create(size_price=size_price, **size_data))
 
-        variation = Variation.objects.create(size=size, add_on=add_on)
+            add_on_list = []
+            for add_on_data in add_on_data_list:
+                add_on_price = Price.objects.create(price=add_on_data.pop('add_on_price')['price'])
+                add_on_list.append(AddOn.objects.create(add_on_price=add_on_price, **add_on_data))
+
+            variation = Variation.objects.create()
+            variation.size.set(size_list)
+            variation.add_on.set(add_on_list)
+        else:
+            variation = None
 
         product_price = Price.objects.create(price=validated_data.pop('product_price')['price'])
         product = Product.objects.create(product_price=product_price, variation=variation, **validated_data)
