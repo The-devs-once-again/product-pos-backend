@@ -25,8 +25,8 @@ class AddOnSerializer(serializers.ModelSerializer):
 
 
 class VariationSerializer(serializers.ModelSerializer):
-    size = SizeSerializer()
-    add_on = AddOnSerializer()
+    size = SizeSerializer(many=True, required=False)
+    add_on = AddOnSerializer(many=True, required=False)
 
     class Meta:
         model = Variation
@@ -45,8 +45,8 @@ class ProductSerializer(serializers.ModelSerializer):
         variation_data = validated_data.pop('variation', None)
 
         if variation_data:
-            size_data_list = variation_data.pop('size')
-            add_on_data_list = variation_data.pop('add_on')
+            size_data_list = variation_data.pop('size', [])
+            add_on_data_list = variation_data.pop('add_on', [])
 
             size_list = []
             for size_data in size_data_list:
@@ -59,8 +59,10 @@ class ProductSerializer(serializers.ModelSerializer):
                 add_on_list.append(AddOn.objects.create(add_on_price=add_on_price, **add_on_data))
 
             variation = Variation.objects.create()
-            variation.size.set(size_list)
-            variation.add_on.set(add_on_list)
+            if size_list:
+                variation.size.set(size_list)
+            if add_on_list:
+                variation.add_on.set(add_on_list)
         else:
             variation = None
 
