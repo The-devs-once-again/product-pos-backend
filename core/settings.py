@@ -75,7 +75,7 @@ WSGI_APPLICATION = 'core.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'neondb',
+        'NAME': 'product-pos-db',
         'USER': 'LemuelGuevara',
         'PASSWORD': 'fGY0hLRmJ8uv',
         'HOST': 'ep-floral-cake-059305.ap-southeast-1.aws.neon.tech',
