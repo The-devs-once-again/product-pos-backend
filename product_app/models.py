@@ -6,22 +6,23 @@ class Price(models.Model):
 
 
 class Size(models.Model):
-    size_choice = models.CharField(max_length=225, default="regular")
+    size_choice = models.CharField(max_length=225)
     size_price = models.OneToOneField(Price, on_delete=models.CASCADE)
 
 
 class AddOn(models.Model):
-    add_on_choice = models.CharField(max_length=225, default=" ")
+    add_on_choice = models.CharField(max_length=225)
     add_on_price = models.OneToOneField(Price, on_delete=models.CASCADE)
 
 
 class Variation(models.Model):
-    size = models.OneToOneField(Size, on_delete=models.CASCADE)
-    add_on = models.OneToOneField(AddOn, on_delete=models.CASCADE)
+    size = models.ManyToManyField(Size)
+    add_on = models.ManyToManyField(AddOn)
 
 
 class Product(models.Model):
     product_name = models.CharField(max_length=225)
     product_price = models.OneToOneField(Price, on_delete=models.CASCADE)
-    category = models.CharField(max_length=255, default=" ")
-    variation = models.OneToOneField(Variation, on_delete=models.CASCADE)
+    product_type = models.CharField(max_length=255)
+    category = models.CharField(max_length=255)
+    variation = models.OneToOneField(Variation, on_delete=models.CASCADE, null=True, blank=True)
