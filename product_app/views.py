@@ -15,7 +15,7 @@ class UpdateProductView(APIView):
     serializer_class = ProductSerializer
 
     def update(self, request, pk, partial=False):
-        data = json.load(request.body.decode('utf-8'))
+        data = json.loads(request.body.decode('utf-8'))
 
         product_model = get_object_or_404(Product, pk=pk)
         serializer = ProductSerializer(product_model, data=data, partial=partial)
