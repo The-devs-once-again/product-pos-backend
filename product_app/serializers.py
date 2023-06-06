@@ -71,6 +71,23 @@ class ProductSerializer(serializers.ModelSerializer):
 
         return product
 
+    def update_variation(self, instance, variation_data):
+        size_data_list = variation_data.pop('size', [])
+        size_list = []
+        for size_data in size_data_list:
+            size_price_data = size_data.pop('size_price')
+            size_price = Price.objects.create(price=size_price_data['price'])
+            size_list.append(Size.objects.create(size_price=size_price, **size_data))
+        instance.variation.size.set(size_list)
+
+        add_on_data_list = variation_data.pop('add_on', [])
+        add_on_list = []
+        for add_on_data in add_on_data_list:
+            add_on_price_data = add_on_data.pop('add_on_price')
+            add_on_price = Price.objects.create(price=add_on_price_data['price'])
+            add_on_list.append(AddOn.objects.create(add_on_price=add_on_price, **add_on_data))
+        instance.variation.add_on.set(add_on_list)
+
     def update(self, instance, validated_data):
         # Handle updating writable nested fields here
         def validate_product_data(data, data_field):
@@ -84,7 +101,8 @@ class ProductSerializer(serializers.ModelSerializer):
         validate_product_data(product_price_data, instance.product_price)
 
         variation_data = validated_data.pop('variation', None)
-        validate_product_data(variation_data, instance.variation)
+        if variation_data is not None:
+            self.update_variation(instance, variation_data)
 
         # Update non-nested fields as usual
         return super().update(instance, validated_data)
