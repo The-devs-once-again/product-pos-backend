@@ -32,6 +32,10 @@ class UpdateProductView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+    def patch(self, request, pk):
+        return self.update(request, pk, partial=True)
+
+
 class CreatProductView(APIView):
     def post(self, request):
         data = json.loads(request.body.decode('utf-8'))
