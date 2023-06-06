@@ -1,7 +1,9 @@
 import json
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
+from rest_framework.response import Response
 from rest_framework import views
+from rest_framework import status
 from rest_framework.views import APIView
 from .models import Product
 from .serializers import ProductSerializer
@@ -22,6 +24,12 @@ class UpdateProductView(APIView):
             serializer.save()
             return JsonResponse(serializer.data)
         return JsonResponse(serializer.errors, status=400)
+
+    def delete(self, request, pk):
+        product_model = get_object_or_404(Product, pk=pk)
+        product_model.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class CreatProductView(APIView):
