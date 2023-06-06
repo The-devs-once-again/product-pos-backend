@@ -1,10 +1,5 @@
-import json
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
-from rest_framework.response import Response
-from rest_framework import views
-from rest_framework import status
 from rest_framework.views import APIView
+from api_logic.view_logic import UpdateView, ListView, DetailView, CreateView
 from .models import Product
 from .serializers import ProductSerializer
 
@@ -12,55 +7,53 @@ from .serializers import ProductSerializer
 
 
 class UpdateProductView(APIView):
-    serializer_class = ProductSerializer
+    update_product_view = UpdateView(
+        serializer_class=ProductSerializer,
+        model=Product,
+    )
 
     def update(self, request, pk, partial=False):
-        data = json.loads(request.body.decode('utf-8'))
-
-        product_model = get_object_or_404(Product, pk=pk)
-        serializer = ProductSerializer(product_model, data=data, partial=partial)
-
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
+        self.update_product_view.update(request=request, pk=pk, partial=partial)
 
     def put(self, request, pk):
-        return self.update(request, pk)
-
-    def delete(self, request, pk):
-        product_model = get_object_or_404(Product, pk=pk)
-        product_model.delete()
-
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return self.put(request, pk)
 
     def patch(self, request, pk):
-        return self.update(request, pk, partial=True)
+        return self.update_product_view.patch(request=request, pk=pk)
+
+    def delete(self, request, pk):
+        return self.update_product_view.delete(request=request, pk=pk)
 
 
 class CreatProductView(APIView):
-    def post(self, request):
-        data = json.loads(request.body.decode('utf-8'))
-        serializer = ProductSerializer(data=data)
+    create_product_view = CreateView(
+        serializer_class=ProductSerializer,
+        model=Product
+    )
 
-        if serializer.is_valid():
-            product = serializer.save()
-            return JsonResponse(serializer.data, status=201)
-        else:
-            return JsonResponse(serializer.errors, status=400)
+    def post(self, request):
+        return self.create_product_view.post(request=request)
 
 
 class ProductListView(APIView):
-    def get(self, request):
-        product_models = Product.objects.all()
-        serializer = ProductSerializer(product_models, many=True)
+    product_list_view = ListView(
+        model=Product,
+        serializer_class=ProductSerializer,
+        response_name="products"
+    )
 
-        return JsonResponse({"products": serializer.data})
+    def get(self, request):
+        return self.product_list_view.get(request=request)
 
 
 class ProductDetailView(APIView):
-    def get(self, request, product_name):
-        product_model = Product.objects.get(product_name=product_name)
-        serializer = ProductSerializer(product_model)
+    product_detail_view = DetailView(
+        serializer_class=ProductSerializer,
+        model=Product,
+    )
 
-        return JsonResponse({"product": serializer.data})
+    def get(self, request, product_name):
+        query_params = {"product_name": product_name}
+
+        return self.product_detail_view.get(request=request, query=query_params)
+
