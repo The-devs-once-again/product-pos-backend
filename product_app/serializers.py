@@ -70,3 +70,21 @@ class ProductSerializer(serializers.ModelSerializer):
         product = Product.objects.create(product_price=product_price, variation=variation, **validated_data)
 
         return product
+
+    def update(self, instance, validated_data):
+        # Handle updating writable nested fields here
+        def validate_product_data(data, data_field):
+            if data is not None:
+                data_instance = data_field
+                for attr, value in data.items():
+                    setattr(data_instance, attr, value)
+                data_instance.save()
+
+        product_price_data = validated_data.pop('product_price', None)
+        validate_product_data(product_price_data, instance.product_price)
+
+        variation_data = validated_data.pop('variation', None)
+        validate_product_data(variation_data, instance.variation)
+
+        # Update non-nested fields as usual
+        return super().update(instance, validated_data)
