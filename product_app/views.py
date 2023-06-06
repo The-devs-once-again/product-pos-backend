@@ -25,6 +25,9 @@ class UpdateProductView(APIView):
             return JsonResponse(serializer.data)
         return JsonResponse(serializer.errors, status=400)
 
+    def put(self, request, pk):
+        return self.update(request, pk)
+
     def delete(self, request, pk):
         product_model = get_object_or_404(Product, pk=pk)
         product_model.delete()
