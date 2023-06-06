@@ -1,12 +1,28 @@
 import json
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from rest_framework import views
 from rest_framework.views import APIView
 from .models import Product
 from .serializers import ProductSerializer
 
-
 # Create your views here.
+
+
+class UpdateProductView(APIView):
+    serializer_class = ProductSerializer
+
+    def update(self, request, pk, partial=False):
+        data = json.load(request.body.decode('utf-8'))
+
+        product_model = get_object_or_404(Product, pk=pk)
+        serializer = ProductSerializer(product_model, data=data, partial=partial)
+
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data)
+        return JsonResponse(serializer.errors, status=400)
+
 
 class CreatProductView(APIView):
     def post(self, request):
