@@ -10,6 +10,7 @@ class UpdateProductView(APIView):
     update_product_view = UpdateView(
         serializer_class=ProductSerializer,
         model=Product,
+        delete_message="Product deleted"
     )
 
     def update(self, request, pk, partial=False):
