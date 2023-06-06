@@ -16,7 +16,7 @@ class ViewLogic(APIView):
     serializer_class: Type[serializers.ModelSerializer]
     model: Type[models.Model]
     response_name: Optional[str] = None
-
+    delete_message: Optional[str] = None
 
 @dataclass
 class UpdateView(ViewLogic):
@@ -41,7 +41,7 @@ class UpdateView(ViewLogic):
         product_model = get_object_or_404(self.model, pk=pk)
         product_model.delete()
 
-        return JsonResponse({"message": "Product deleted"})
+        return JsonResponse({"message": self.delete_message})
 
 
 @dataclass
