@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Order, OrderHistory, Billing
+from product_app.models import Product
 
 
 class ProductSerializer(serializers.ModelSerializer):
