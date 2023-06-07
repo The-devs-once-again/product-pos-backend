@@ -18,6 +18,7 @@ class ViewLogic(APIView):
     response_name: Optional[str] = None
     delete_message: Optional[str] = None
 
+
 @dataclass
 class UpdateView(ViewLogic):
     def update(self, request, pk, partial=False):
