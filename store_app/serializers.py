@@ -1,12 +1,6 @@
 from rest_framework import serializers
 from .models import Order, OrderHistory, Billing
-from product_app.models import Product
-
-
-class ProductSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Product
-        fields = '__all__'
+from product_app.serializers import ProductSerializer
 
 
 class OrderSerializer(serializers.ModelSerializer):
