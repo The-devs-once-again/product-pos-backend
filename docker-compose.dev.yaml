@@ -4,6 +4,8 @@ services:
     image: mini-project:product-pos
     container_name: product-pos-dev
     command: sh -c "python manage.py migrate --settings=core.dev_settings && python manage.py runserver 0.0.0.0:8001 && wait"
+    environment:
+      DJANGO_SETTINGS_MODULE: core.dev_settings
     depends_on:
       - dev_db
     ports:
