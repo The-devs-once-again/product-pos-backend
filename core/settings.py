@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'product_app',
+    'store_app',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -75,11 +76,12 @@ WSGI_APPLICATION = 'core.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'product-pos-db',
-        'USER': 'LemuelGuevara',
-        'PASSWORD': 'fGY0hLRmJ8uv',
-        'HOST': 'ep-floral-cake-059305.ap-southeast-1.aws.neon.tech',
-    }
+        'NAME': 'product_pos_prod_db',
+        'USER': 'postgres_prod',
+        'PASSWORD': '1ARois1jp3eyO8w3Edak',
+        'HOST': 'product-pos-prod-db.cnepa9thawvc.us-west-2.rds.amazonaws.com',
+        'PORT': '5432',
+    },
 }
 
 # Password validation
@@ -109,7 +111,7 @@ TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
