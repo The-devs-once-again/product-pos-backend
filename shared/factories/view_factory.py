@@ -2,6 +2,7 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from typing import Type
 
 from rest_framework.views import APIView
 
@@ -11,74 +12,66 @@ from shared.configs.view_config import GenericViewConfigLoader, ViewConfig
 
 @dataclass
 class ViewFactory(ABC):
-    """Abstract factory that represents generic views"""
+    """Abstract factory that represents generic views.
+
+    This class defines a common interface for creating instances of different views.
+    Subclasses of this class must implement the `get_view` method to create and return
+    instances of specific views.
+    """
 
     @abstractmethod
-    def get_update_view(self) -> UpdateView:
-        """Returns an UpdateView"""
-
-    @abstractmethod
-    def get_create_view(self) -> CreateView:
-        """Returns a CreateView"""
-
-    @abstractmethod
-    def get_list_view(self) -> ListView:
-        """Returns a ListView"""
-
-    @abstractmethod
-    def get_detail_view(self) -> DetailView:
-        """Returns a DetailView"""
-
-    @abstractmethod
-    def get_delete_all_view(self) -> DeleteAllView:
-        """Returns a new delete all objects view"""
+    def get_view(self, view_name: str):
+        """Returns a new view instance"""
 
 
 class BaseView(GenericViewConfigLoader, ViewFactory):
     """Concrete factory for creating instances of the generic views"""
 
-    def get_update_view(self) -> UpdateView:
-        return UpdateView(self.view_config)
+    views = {
+        'update_view': UpdateView,
+        'create_view': CreateView,
+        'list_view': ListView,
+        'detail_view': DetailView,
+        'delete_all_view': DeleteAllView,
+    }
 
-    def get_create_view(self) -> CreateView:
-        return CreateView(self.view_config)
-
-    def get_list_view(self) -> ListView:
-        return ListView(self.view_config)
-
-    def get_detail_view(self) -> DetailView:
-        return DetailView(self.view_config)
-
-    def get_delete_all_view(self) -> DeleteAllView:
-        return DeleteAllView(self.view_config)
+    def get_view(self, view_name: str):
+        view_class = self.views[view_name]
+ 
+        return view_class(self.view_config)
 
 
 @dataclass
 class GenericViewFactory(APIView):
-    """Concrete factory for returning the generic view instances form the BaseView factory. It also
-        takes in a view_config which then shares across all generic views"""
+    """Concrete factory for returning the generic view instances form the
+        BaseView factory.
+        
+        This class takes in a ViewConfig then initializes the BaseView.
+        The initialized views can be access through the use of properties
+        which return their responding view types.
+        """
 
     view_config: ViewConfig
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         self.base_view = BaseView(view_config=self.view_config)
 
     @property
-    def update_view(self):
-        return self.base_view.get_update_view()
+    def update_view(self) -> Type[UpdateView]:
+        return self.base_view.get_view('update_view')
 
     @property
-    def create_view(self):
-        return self.base_view.get_create_view()
+    def create_view(self) -> Type[CreateView]:
+        return self.base_view.get_view('create_view')
 
     @property
-    def list_view(self):
-        return self.base_view.get_list_view()
+    def list_view(self) -> Type[ListView]:
+        return self.base_view.get_view('list_view')
 
     @property
-    def detail_view(self):
-        return self.base_view.get_detail_view()
+    def detail_view(self) -> Type[DetailView]:
+        return self.base_view.get_view('detail_view')
 
     @property
-    def delete_all_view(self):
-        return self.base_view.get_delete_all_view()
+    def delete_all_view(self) -> Type[DeleteAllView]:
+        return self.base_view.get_view('delete_all_view')
