@@ -1,6 +1,7 @@
 """This file is responsible for handling the object factories"""
 
 from abc import abstractmethod, ABC
+from typing import Any
 
 from django.db import models
 
@@ -13,5 +14,5 @@ class ObjectFactory(ABC):
         """Returns a model"""
 
     @abstractmethod
-    def update_object(self, instance, validated_data):
+    def update_object(self, instance, validated_data) -> Any:
         """Updates the object"""
