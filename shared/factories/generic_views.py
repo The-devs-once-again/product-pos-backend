@@ -20,25 +20,27 @@ from shared.interfaces.view_interface import (
 class UpdateView(GenericViewConfigLoader, UpdateViewInterface):
     """Generic view that does the update methods"""
 
-    def _get_model_class(self, pk=None, lookup_query=None) -> models.Model:
+    def _get_object(self, pk=None, lookup_query=None) -> models.Model:
         if lookup_query is not None:
-            model_class = get_object_or_404(self.view_config.model, **lookup_query)
+            object = get_object_or_404(self.view_config.model, **lookup_query)
 
         else:
-            model_class = get_object_or_404(self.view_config.model, pk=pk)
+            object = get_object_or_404(self.view_config.model, pk=pk)
 
-        return model_class
+        return object
 
     def update(self, request: Request, pk=None, lookup_query=None, partial=False):
-        data = json.loads(request.body.decode('utf-8'))
-        serializer_class = self._get_model_class(pk=pk, lookup_query=lookup_query)
-
-        serializer = self.view_config.serializer_class(serializer_class, data=data, partial=partial)
+        data = request.data
+        object_instance = self._get_object(pk=pk, lookup_query=lookup_query)
+        context = {'request': request}
+        serializer = self.view_config.serializer_class(object_instance, data=data,  # type: ignore
+                    partial=partial, context=context)
 
         if serializer.is_valid():
             serializer.save()
             return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
+        else:
+            return JsonResponse(serializer.errors, status=400)
 
     def put(self, request: Request, pk=None, lookup_query=None):
         return self.update(request, pk, lookup_query=lookup_query)
@@ -47,7 +49,7 @@ class UpdateView(GenericViewConfigLoader, UpdateViewInterface):
         return self.update(request, pk, lookup_query=lookup_query, partial=True)
 
     def delete(self, request: Request, pk=None, lookup_query=None):
-        model = self._get_model_class(pk, lookup_query=lookup_query)
+        model = self._get_object(pk, lookup_query=lookup_query)
         model.delete()
 
         return JsonResponse({"message": self.view_config.delete_message})
