@@ -10,7 +10,6 @@ from .generic_views import UpdateView, CreateView, ListView, DetailView, DeleteA
 from shared.configs.view_config import GenericViewConfigLoader, ViewConfig
 
 
-@dataclass
 class ViewFactory(ABC):
     """Abstract factory that represents generic views.
 
@@ -54,24 +53,24 @@ class GenericViewFactory(APIView):
     view_config: ViewConfig
 
     def __post_init__(self) -> None:
-        self.base_view = BaseView(view_config=self.view_config)
+        self.__base_view = BaseView(view_config=self.view_config)
 
     @property
     def update_view(self) -> Type[UpdateView]:
-        return self.base_view.get_view('update_view')
+        return self.__base_view.get_view('update_view')
 
     @property
     def create_view(self) -> Type[CreateView]:
-        return self.base_view.get_view('create_view')
+        return self.__base_view.get_view('create_view')
 
     @property
     def list_view(self) -> Type[ListView]:
-        return self.base_view.get_view('list_view')
+        return self.__base_view.get_view('list_view')
 
     @property
     def detail_view(self) -> Type[DetailView]:
-        return self.base_view.get_view('detail_view')
+        return self.__base_view.get_view('detail_view')
 
     @property
     def delete_all_view(self) -> Type[DeleteAllView]:
-        return self.base_view.get_view('delete_all_view')
+        return self.__base_view.get_view('delete_all_view')
