@@ -1,8 +1,6 @@
 """This file is responsible for making the generic views"""
 
-from functools import partial
 import json
-from re import L
 from rest_framework import mixins, status
 from django.db import models
 from django.shortcuts import get_object_or_404
@@ -11,7 +9,6 @@ from rest_framework.response import Response
 from shared.configs.view_config import GenericViewConfigLoader
 from shared.interfaces.view_interface import (
     CreateViewInterface,
-    DeleteViewInterface,
     DetailViewInterface,
     ListViewInterface,
     UpdateViewInterface,
