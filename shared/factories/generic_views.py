@@ -1,16 +1,17 @@
 """This file is responsible for making the generic views"""
 
+from functools import partial
 import json
-
+from re import L
+from rest_framework import mixins, status
 from django.db import models
-from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from rest_framework.request import Request
-
+from rest_framework.response import Response
 from shared.configs.view_config import GenericViewConfigLoader
 from shared.interfaces.view_interface import (
     CreateViewInterface,
-    DeleteAllViewInterface,
+    DeleteViewInterface,
     DetailViewInterface,
     ListViewInterface,
     UpdateViewInterface,
@@ -38,21 +39,15 @@ class UpdateView(GenericViewConfigLoader, UpdateViewInterface):
 
         if serializer.is_valid():
             serializer.save()
-            return JsonResponse(serializer.data)
+            return Response(serializer.data)
         else:
-            return JsonResponse(serializer.errors, status=400)
+            return Response(serializer.errors, status=400)
+    
+    def put(self, request: Request, pk=None, lookup_query=None) -> Response:
+        return self.update(request, pk=pk, lookup_query=lookup_query)
 
-    def put(self, request: Request, pk=None, lookup_query=None):
-        return self.update(request, pk, lookup_query=lookup_query)
-
-    def patch(self, request: Request, pk=None, lookup_query=None):
-        return self.update(request, pk, lookup_query=lookup_query, partial=True)
-
-    def delete(self, request: Request, pk=None, lookup_query=None):
-        model = self._get_object(pk, lookup_query=lookup_query)
-        model.delete()
-
-        return JsonResponse({"message": self.view_config.delete_message})
+    def patch(self, request: Request, pk=None, lookup_query=None) -> Response:
+        return self.update(request, pk=pk, lookup_query=lookup_query, partial=True)
 
 
 class CreateView(GenericViewConfigLoader, CreateViewInterface):
@@ -64,35 +59,48 @@ class CreateView(GenericViewConfigLoader, CreateViewInterface):
 
         if serializer.is_valid():
             serializer.save()
-            return JsonResponse(serializer.data, status=201)
+            return Response(serializer.data, status=201)
         else:
-            return JsonResponse(serializer.errors, status=400)
+            return Response(serializer.errors, status=400)
 
 
 class ListView(GenericViewConfigLoader, ListViewInterface):
     """Generic view that lists all objects in the database"""
 
-    def get(self, request: Request) -> JsonResponse:
+    def get(self, request: Request) -> Response:
         model_list = self.view_config.model.objects.all()
         serializer = self.view_config.serializer_class(model_list, many=True)
 
-        return JsonResponse({self.view_config.response_name: serializer.data})
+        return Response({self.view_config.response_name: serializer.data})
 
 
 class DetailView(GenericViewConfigLoader, DetailViewInterface):
     """Generic view that gets a single object in the database"""
 
-    def get(self, request: Request, query: dict) -> JsonResponse:
+    def get(self, request: Request, query: dict) -> Response:
         model_detail = self.view_config.model.objects.get(**query)
         serializer = self.view_config.serializer_class(model_detail)
 
-        return JsonResponse(serializer.data)
+        return Response(serializer.data)
 
 
-class DeleteAllView(GenericViewConfigLoader, DeleteAllViewInterface):
-    """Generic view that deletes all objects in the database"""
+class DeleteView(GenericViewConfigLoader, mixins.DestroyModelMixin):
+    """Generic view that either accepts a single delete or deletes all instances"""
 
-    def delete(self, request: Request) -> JsonResponse:
-        self.view_config.model.objects.all().delete()
+    def delete(self, request: Request) -> Response:
+        delete_all = request.query_params.get('delete_all', 'false').lower() == 'true'
 
-        return JsonResponse({"message": self.view_config.delete_message})
+        if delete_all:
+            # All objects deletion
+            self.view_config.model.objects.all().delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            # Single object deletion
+            pk = request.query_params.get('pk')
+            
+            if pk is not None:
+                self.view_config.model.objects.filter(pk=pk).delete()
+
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            else:
+                return Response(status=status.HTTP_400_BAD_REQUEST)
