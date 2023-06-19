@@ -1,0 +1,30 @@
+services:
+  dev:
+    build: .
+    image: mini-project:product-pos-backend
+    container_name: product-pos-dev
+    command: sh -c "python manage.py makemigrations && 
+          python manage.py migrate --settings=core.dev_settings && python manage.py runserver 0.0.0.0:8001 && wait"
+    environment:
+      DJANGO_SETTINGS_MODULE: core.dev_settings
+    depends_on:
+      - dev_db
+    ports:
+      - 8001:8001
+    volumes:
+      - .:/mini-project
+
+  dev_db:
+    image: postgres:15
+    volumes:
+      - data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    container_name: product-pos-dev-db
+    ports:
+      - "5432:5432"
+
+volumes:
+  data:

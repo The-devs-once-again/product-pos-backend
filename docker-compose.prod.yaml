@@ -1,0 +1,11 @@
+services:
+  prod:
+    build: .
+    image: mini-project:product-pos-backend
+    container_name: product-pos-prod
+    command: sh -c "python manage.py runserver 0.0.0.0:8000 && wait"
+    ports:
+      - 8000:8000
+    volumes:
+      - .:/mini-project
+
