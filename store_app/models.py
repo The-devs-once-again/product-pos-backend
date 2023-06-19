@@ -1,5 +1,5 @@
 from django.db import models
-from shared.product_app.models import Product
+from shared.apps.product_app.models import Product
 from django.utils.crypto import get_random_string
 import uuid
 
