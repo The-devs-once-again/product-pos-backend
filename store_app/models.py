@@ -30,11 +30,10 @@ class Order(models.Model):
 class OrderHistory(models.Model):
     orders = models.ForeignKey(Order, on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now_add=True)
-    date_completed = models.DateTimeField(auto_now_add=True)
 
 
 class Billing(models.Model):
-    order = models.OneToOneField(Order, on_delete=models.CASCADE)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
     ref_id = models.CharField(max_length=225, null=True, blank=True)
     date = models.DateTimeField(auto_now_add=True)
     payment_method = models.CharField(max_length=225)
