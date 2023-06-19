@@ -15,6 +15,7 @@ class Item(models.Model):
 
 class Order(models.Model):
     order_date = models.DateTimeField(auto_now_add=True)
+    ref_id = models.CharField(max_length=225, blank=True, null=True)
     order_id = models.CharField(max_length=225, blank=True, null=True)
     order_quantity = models.IntegerField(default=0, blank=True, null=True)
     order_status = models.CharField(max_length=225)
@@ -34,7 +35,16 @@ class OrderHistory(models.Model):
 
 class Billing(models.Model):
     order = models.OneToOneField(Order, on_delete=models.CASCADE)
-    ref_id = models.CharField(max_length=225)
+    ref_id = models.CharField(max_length=225, null=True, blank=True)
     date = models.DateTimeField(auto_now_add=True)
     payment_method = models.CharField(max_length=225)
     amount = models.FloatField(blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+
+        if not self.ref_id:
+            self.ref_id = get_random_string(length=12).upper()
+            self.order.ref_id = self.ref_id
+            self.order.save()
+
+        super().save(*args, **kwargs)
