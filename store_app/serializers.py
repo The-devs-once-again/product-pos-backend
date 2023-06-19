@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from shared.product_app.serializers import ProductSerializer
+from shared.apps.product_app.serializers import ProductSerializer
 from store_app.store_factories.store_object_factory import ItemFactory, OrderFactory, BillingFactory
 from .models import Item, Order, Billing
 
