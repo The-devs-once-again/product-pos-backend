@@ -2,7 +2,7 @@
 
 from django.db import models
 from shared.factories.object_factory import ObjectFactory
-from shared.product_app.factories.product_object_factory import ProductFactory
+from shared.apps.product_app.factories.product_object_factory import ProductFactory
 from store_app.models import Order, Item, Billing
 
 
