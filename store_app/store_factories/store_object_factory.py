@@ -272,10 +272,10 @@ class BillingFactory(ObjectFactory[Billing]):
         order = OrderFactory().create_object(order_data)
 
         amount = self._get_billing_total(order)
-        payment_method = "CASH"
+        payment_method = validated_data.get("payment_method")
  
         billing = Billing.objects.create(
-            payment_method=payment_method, amount=amount, order=order
+            amount=amount, order=order, payment_method=payment_method
         )
 
         return billing
